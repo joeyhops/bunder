@@ -1,0 +1,48 @@
+{
+  "name": "bunder",
+  "description": "Bunder is a package manager for Linux",
+  "version": "0.0.0",
+  "author": "Joe Hopkins",
+  "bin": {
+    "bunder": "./bin/run"
+  },
+  "bugs": "https://github.com/joehop67/bunder/issues",
+  "dependencies": {
+    "@oclif/command": "^1.5.15",
+    "@oclif/config": "^1.13.0",
+    "@oclif/plugin-help": "^2.2.0"
+  },
+  "devDependencies": {
+    "@oclif/dev-cli": "^1.22.0",
+    "globby": "^8.0.2"
+  },
+  "engines": {
+    "node": ">=8.0.0"
+  },
+  "files": [
+    "/bin",
+    "/npm-shrinkwrap.json",
+    "/oclif.manifest.json",
+    "/src"
+  ],
+  "homepage": "https://github.com/joehop67/bunder",
+  "keywords": [
+    "oclif"
+  ],
+  "license": "MIT",
+  "main": "src/index.js",
+  "oclif": {
+    "commands": "./src/commands",
+    "bin": "bunder",
+    "plugins": [
+      "@oclif/plugin-help"
+    ]
+  },
+  "repository": "joehop67/bunder",
+  "scripts": {
+    "postpack": "rm -f oclif.manifest.json",
+    "prepack": "oclif-dev manifest && oclif-dev readme",
+    "test": "echo NO TESTS",
+    "version": "oclif-dev readme && git add README.md"
+  }
+}
