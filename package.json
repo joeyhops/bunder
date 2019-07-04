@@ -1,7 +1,7 @@
 {
   "name": "bunder",
   "description": "Bunder is a package manager for Linux",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "author": "Joe Hopkins",
   "bin": {
     "bunder": "./bin/run"
@@ -10,7 +10,13 @@
   "dependencies": {
     "@oclif/command": "^1.5.15",
     "@oclif/config": "^1.13.0",
-    "@oclif/plugin-help": "^2.2.0"
+    "@oclif/plugin-help": "^2.2.0",
+    "decompress": "^4.2.0",
+    "decompress-tar": "^4.1.1",
+    "decompress-tarbz2": "^4.1.1",
+    "decompress-targz": "^4.1.1",
+    "decompress-tarxz": "^2.1.1",
+    "fs-extra": "^8.1.0"
   },
   "devDependencies": {
     "@oclif/dev-cli": "^1.22.0",
@@ -33,6 +39,9 @@
   "main": "src/index.js",
   "oclif": {
     "commands": "./src/commands",
+		"hooks": {
+			"init": "./src/hooks/init/bootstrap"
+		},
     "bin": "bunder",
     "plugins": [
       "@oclif/plugin-help"

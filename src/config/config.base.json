@@ -1,0 +1,11 @@
+{
+	"prefix": "/usr/bun",
+	"localbase": "/usr/bun",
+	"distdir": "/usr/bunder/distfiles",
+	"bun_dbdir": "/usr/bun/bundb",
+	"packages": "/usr/bunder/packages",
+	"bun_keep_dest": false,
+	"bun_sysconfbase": "/usr/bun/etc",
+	"varbase": "/var",
+	"bun_confdir": "/usr/bunder/conf"
+}
