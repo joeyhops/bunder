@@ -6,3 +6,7 @@
 /yarn.lock
 node_modules
 *.swp
+*.tar
+*.tar.*
+*.bun
+*.bun.*

@@ -16,14 +16,17 @@ module.exports = {
 		if (outdir) {
 			return decompress(file, outdir, {
 				plugins
-			}).then(() => {
+			}).then((files) => {
 				console.log(`Decompressed ${file} to ${outdir}`)
+				return files[0]
 			})
 		} else {
 			return decompress(file, '.', {
 				plugins: plugins
-			}).then(() => {
+			}).then((files) => {
+				console.log(files[0])
 				console.log(`Decompressed ${file}`)
+				return files[0]
 			})
 		}
 	},

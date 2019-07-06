@@ -1,17 +1,21 @@
+const {Command} = require('@oclif/command')
 const fs = require('fs-extra')
-const path = require('path')
+const installed = require('../util/installed')
 const {cli} = require('cli-ux')
+const path = require('path')
 
-module.exports = async function (options) {
-	const first = await checkInstalled(options)
-	if (first) {
-		return
+class BootstrapCommand extends Command {
+	async run() {
+		const isRoot = process.getuid && process.getuid() === 0
+		if (!isRoot) this.exit('You need to be root in order to bootstrap Bunder')
+		const isInstalled = await installed()
+		if (isInstalled) this.exit('Bunder already bootstrapped')
+
+		console.log('Thank you for downloading Bunder')
+		const confirm = cli.confirm('Beginning installation. Would you like to continue? (y/n)')
+		if (confirm) installBun(this.config).then(() => console.log('Toasty Buns! Bunder has been successfully installed!'))
+		else this.exit('Fare Thee Well')
 	}
-	console.log('Bundir is not currently installed on the system')
-	console.log('Preparing to install; You must be root (or sudo) to install')
-	const confirm = await cli.confirm('Do you wish to continue? y/n')
-	if (confirm) installBun(options)
-	else this.exit(1)
 }
 
 async function installBun (vars) {
@@ -48,11 +52,4 @@ async function createBunDir (dir) {
 	}
 }
 
-async function checkInstalled (vars) {
-	const confExists = await fs.pathExists('/usr/bunder/conf/config.json')
-	if (confExists) {
-		return true
-	} else {
-		return false
-	}
-}
+module.exports = BootstrapCommand

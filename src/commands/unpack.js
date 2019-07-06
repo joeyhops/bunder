@@ -1,9 +1,9 @@
-const {Command} = require('@oclif/command')
+const Base = require('../base')
 const fs = require('fs')
 const path = require('path')
 const {uncompress} = require('../util/compression-utils')
 
-class UnpackCommand extends Command {
+class UnpackCommand extends Base {
 	async run() {
 		const {file, outdir} = this.parse(UnpackCommand).args
 		if (file) {

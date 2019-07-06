@@ -1,4 +1,5 @@
-const {Command, flags} = require('@oclif/command')
+const Base = require('../base')
+const {flags} = require('@oclif/command')
 const fs = require('fs')
 const path = require('path')
 const {spawn} = require('child_process')
@@ -6,7 +7,7 @@ const {uncompress, trimArchExt, createArch} = require('../util/compression-utils
 // dev
 const util = require('util')
 
-class MkpkgCommand extends Command {
+class MkpkgCommand extends Base {
 	async run() {
 		const {flags, args} = this.parse(MkpkgCommand)
 		const {file} = args
@@ -14,6 +15,7 @@ class MkpkgCommand extends Command {
 		const pkgName = (flags.hasOwnProperty('name') && flags.name) 
 			? flags.name
 			: trimArchExt(file)
+		const {prefix} = this.config.bun
 		console.log(util.inspect(process.env))
 		if (file) {
 			this.log('Begin Packaging for ' + file)
@@ -25,7 +27,7 @@ class MkpkgCommand extends Command {
 				if (err) {
 					console.error(err)
 				} else {
-					await configBunPkg(src, flags, buildDir, (bd, srcDir) => {
+					await configBunPkg(prefix, src, flags, buildDir, (bd, srcDir) => {
 						fs.access(`${bd}/Makefile`, fs.constants.F_OK, async (err) => {
 							if (err) {
 								console.log(err)
@@ -35,9 +37,9 @@ class MkpkgCommand extends Command {
 								compileBunPkg(flags, buildDir, bd, srcDir, () => {
 									console.log('Package Successfully compiled!')
 									console.log(`Installing to package ${pkgName}.bun.tgz now`)
-									mkpkg(pkgName, flags, bd, srcDir, (cur) => {
+									mkpkg(prefix, pkgName, flags, bd, srcDir, (cur) => {
 										process.chdir(cur)
-										cleanup(`${pkgName}.bun.tgz`, bd, srcDir)
+										cleanup(this.config.bun, `${pkgName}.bun.tgz`, bd, srcDir)
 									})
 								})
 							}
@@ -49,7 +51,7 @@ class MkpkgCommand extends Command {
 	}
 }
 
-async function configBunPkg (src, flags, buildDir, cb) {
+async function configBunPkg (prefix, src, flags, buildDir, cb) {
 	console.log('Found config file')
 	console.log('Creating build directory: ' + buildDir)
 	fs.mkdir(`pkg_tmp/${buildDir}`, {}, (err) => {
@@ -58,7 +60,7 @@ async function configBunPkg (src, flags, buildDir, cb) {
 	console.log('Successfully created ' + buildDir)
 	var bd = path.resolve(`pkg_tmp/${buildDir}`)
 	const srcDir = path.join(path.resolve('pkg_tmp'), src)
-	const configArgs = ['--prefix=$HOME/.test']
+	const configArgs = [`--prefix=${prefix}`]
 	console.log('Checking for config options')
 	if (flags.hasOwnProperty('configOptions') && flags.configOptions.length > 0){
 		configArgs.concat(flags['configOptions'])
@@ -105,7 +107,7 @@ function compileBunPkg (flags, buildDir, bd, srcDir, cb) {
 	})
 }
 
-async function mkpkg(name, flags, bd, srcDir, cb) {
+async function mkpkg(prefix, name, flags, bd, srcDir, cb) {
 	const cur = path.resolve('./')
 	process.chdir(bd)
 	const {output} = flags
@@ -118,7 +120,7 @@ async function mkpkg(name, flags, bd, srcDir, cb) {
 		installArgs.concat(flags.installOptions)
 	}
 	const dest = path.resolve('_destdir')
-	const envVars = {...process.env, prefix: '$HOME/.test', PREFIX: '$HOME/.test', DESTDIR: dest}
+	const envVars = {...process.env, prefix: prefix, PREFIX: prefix, DESTDIR: dest}
 	console.log(installArgs)
 	const installProc = spawn('make', installArgs, {
 		cwd: bd,
@@ -135,7 +137,7 @@ async function mkpkg(name, flags, bd, srcDir, cb) {
 	installProc.on('close', (code) => {
 		console.log(`BUN: MAKE INSTALL: finished with code ${code}`)
 		console.log(`Install to _destdir successful, creating archive`)
-		const pkgSrc = path.join(dest, `${process.env.HOME}/.test`)
+		const pkgSrc = path.join(dest, prefix)
 		createArch(pkgSrc, bd, pkg, () => {
 			console.log('Package Archive successfully created')
 			cb(cur)
@@ -143,11 +145,11 @@ async function mkpkg(name, flags, bd, srcDir, cb) {
 	})
 }
 
-function cleanup(pkgFile, bd, sd) {
+function cleanup(bconf, pkgFile, bd, sd) {
 	console.log(`Package creation was successful!`)
 	console.log('Cleaning Up')
 	var pkgBd = path.join(bd, pkgFile)
-	var pkgTo = path.join(path.resolve('./'), pkgFile)
+	var pkgTo = path.join(bconf.packages, pkgFile)
 	var delDir = path.resolve('./pkg_tmp')
 	fs.copyFile(pkgBd, pkgTo, (err) => {
 		if (err) throw err

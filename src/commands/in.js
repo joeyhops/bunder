@@ -1,13 +1,12 @@
-const {Command} = require('@oclif/command')
+const Base = require('../base')
 const fs = require('fs')
 const path = require('path')
 const {uncompress, trimArchExt} = require('../util/compression-utils')
-const BUNDIR = path.join(process.env.HOME, '.bundir')
 
-class InCommand extends Command {
+class InCommand extends Base {
 	async run() {
 		const {bunfile} = this.parse(InCommand).args
-		const prefix = path.join(process.env.HOME, '.test')
+		const {prefix} = this.config.bun
 		const pkg = path.resolve(bunfile)
 		this.log(`package location: ${pkg}`)
 		this.log('Installing...')
@@ -17,22 +16,16 @@ class InCommand extends Command {
 				doInstall(pkg, prefix)
 			})	
 		} else {
-			doInstall(pkg, prefix)
+			doInstall(pkg, prefix, this.config.bun.packages)
 		}
 	}
 }
 
-function doInstall (fullPkg, prefix) {
+function doInstall (fullPkg, prefix, pkgdir) {
 	uncompress(fullPkg, prefix)
 	const nicePkgName = trimArchExt(path.basename(fullPkg))
 	console.log(`${nicePkgName} installed to ${prefix}`)
-	console.log('TODO: MOVE THIS SOMEWHERE ELSE. DEV STINK HERE')
-	console.log('moving bunfile to bundir')
-	var pkgStore = path.join(BUNDIR, 'pkgs')
-	if (!fs.existsSync(BUNDIR)) {
-		fs.mkdirSync(pkgStore, { recursive: true })
-	}
-	fs.copyFileSync(fullPkg, path.join(pkgStore, path.basename(fullPkg)))
+	fs.copyFileSync(fullPkg, path.join(pkgdir, path.basename(fullPkg)))
 	console.log('Installation is complete')
 	console.log('TODO: DELETE FILE AFTERWARDS')
 }
