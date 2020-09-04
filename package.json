@@ -12,7 +12,7 @@
     "@oclif/config": "^1.13.0",
     "@oclif/plugin-help": "^2.2.0",
     "cli-ux": "^5.3.0",
-    "decompress": "^4.2.0",
+    "decompress": "^4.2.1",
     "decompress-tar": "^4.1.1",
     "decompress-tarbz2": "^4.1.1",
     "decompress-targz": "^4.1.1",
